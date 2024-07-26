@@ -17,7 +17,24 @@ const register = async (req, res) => {
         email,
         password: hashedPassword,
       });
-      res.status(200).json({ newUser });
+      const userObject = {
+        id: newUser?._id?.toString(),
+        userName: newUser?.fullName,
+      };
+      const token = createAccessToken(userObject);
+      const refreshToken = createRefreshToken(userObject);
+
+      newUser.refreshToken = refreshToken;
+      await newUser.save();
+
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        sameSite: 'none',
+        maxAge: 24 * 60 * 60 * 1000,
+        secure: true,
+      });
+
+      res.status(200).json({ token, userName: newUser?.fullName });
     }
   } catch (error) {
     res.status(500).json(error);
