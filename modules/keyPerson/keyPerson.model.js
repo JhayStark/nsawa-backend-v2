@@ -10,9 +10,6 @@ const keyPersonSchema = new Schema(
       type: String,
       required: true,
     },
-    email: {
-      type: String,
-    },
     relation: {
       type: String,
       required: true,

@@ -38,9 +38,8 @@ const editFuneral = async (req, res) => {
 const getAllFunerals = async (req, res) => {
   const userId = req.user.id;
   const search = req.query.search || '';
-  const pageSize = req.query.pageSize || 10;
-  const pageNumber = req.query.pageNumber || 1;
-  const skip = (pageNumber - 1) * pageSize;
+  const pageSize = req.query.pageSize;
+  const pageNumber = req.query.pageNumber;
 
   try {
     const filter = {
@@ -53,12 +52,24 @@ const getAllFunerals = async (req, res) => {
     if (userId) {
       filter.userId = userId;
     }
+    let funerals;
     const total = await Funeral.countDocuments(filter);
-    const funerals = await Funeral.find(filter)
-      .sort({ createdAt: -1 })
-      .limit(pageSize)
-      .skip(skip);
-    res.status(200).json({ funerals, total, pageNumber, pageSize });
+    if (pageSize && pageNumber) {
+      const skip = (pageNumber - 1) * pageSize;
+      funerals = await Funeral.find(filter)
+        .sort({ createdAt: -1 })
+        .limit(Number(pageSize))
+        .skip(skip);
+      res.status(200).json({
+        funerals,
+        total,
+        pageNumber: Number(pageNumber),
+        pageSize: Number(pageSize),
+      });
+    } else {
+      funerals = await Funeral.find(filter).sort({ createdAt: -1 });
+      res.status(200).json({ funerals, total });
+    }
   } catch (error) {
     res.status(500).json(error);
   }

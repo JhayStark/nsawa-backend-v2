@@ -17,20 +17,19 @@ const donationsSchema = new Schema(
     },
     modeOfDonation: {
       type: String,
-      enum: ['Momo', 'Cash'],
+      enum: ['Momo', 'Cash', 'Card'],
       required: true,
     },
     donorPhoneNumber: {
       type: String,
       require: true,
     },
-    donorEmail: {
-      type: String,
-      require: true,
-    },
     amountDonated: {
       type: Number,
       required: true,
+    },
+    announcment: {
+      type: String,
     },
   },
   { timestamps: true }

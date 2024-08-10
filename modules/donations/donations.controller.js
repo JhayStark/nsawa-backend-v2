@@ -75,6 +75,7 @@ const donationStats = async (req, res) => {
               },
             },
           },
+          numberOfDonations: { $sum: 1 },
         },
       },
     ]);
@@ -85,6 +86,7 @@ const donationStats = async (req, res) => {
         totalDonations: 0,
         totalCashDonations: 0,
         totalMomoDonations: 0,
+        numberOfDonations: 0,
       };
     }
 

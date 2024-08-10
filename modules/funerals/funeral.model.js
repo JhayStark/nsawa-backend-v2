@@ -2,10 +2,9 @@ const { Schema, model, default: mongoose } = require('mongoose');
 
 const funeralSchema = new Schema(
   {
-    nameOfFuneral: {
-      type: String,
-      required: true,
-    },
+    // nameOfFuneral: {
+    //   type: String,
+    // },
     nameOfDeceased: {
       type: String,
       required: true,
@@ -59,6 +58,9 @@ const funeralSchema = new Schema(
       default: false,
     },
     imageOfDeceased: {
+      type: [String],
+    },
+    bannerImage: {
       type: String,
     },
   },
