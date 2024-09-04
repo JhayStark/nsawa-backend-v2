@@ -39,7 +39,8 @@ const getDonations = async (req, res) => {
     const donations = await Donation.find(filter)
       .sort({ createdAt: -1 })
       .limit(pageSize)
-      .skip(skip);
+      .skip(skip)
+      .populate('keyPerson');
     res.status(200).json({ donations, total, pageNumber, pageSize });
   } catch (error) {
     res.status(500).json(error);

@@ -8,7 +8,6 @@ const keyPersonSchema = new Schema(
     },
     phoneNumber: {
       type: String,
-      required: true,
     },
     relation: {
       type: String,

@@ -10,7 +10,7 @@ const createFuneral = async (req, res) => {
       userId,
     });
     if (funeral) {
-      return res.status(200).json('Funeral created ');
+      return res.status(200).json({ id: funeral._id });
     }
   } catch (error) {
     return res.status(500).json(error);
@@ -57,7 +57,7 @@ const getAllFunerals = async (req, res) => {
     if (pageSize && pageNumber) {
       const skip = (pageNumber - 1) * pageSize;
       funerals = await Funeral.find(filter)
-        .sort({ createdAt: -1 })
+        .sort({ createdAt: 1 })
         .limit(Number(pageSize))
         .skip(skip);
       res.status(200).json({

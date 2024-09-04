@@ -28,7 +28,7 @@ const donationsSchema = new Schema(
       type: Number,
       required: true,
     },
-    announcment: {
+    announcement: {
       type: String,
     },
   },

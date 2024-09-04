@@ -2,14 +2,18 @@ const { Schema, model, default: mongoose } = require('mongoose');
 
 const funeralSchema = new Schema(
   {
-    // nameOfFuneral: {
-    //   type: String,
-    // },
+    familyName: {
+      type: String,
+    },
     nameOfDeceased: {
       type: String,
       required: true,
     },
-    ageOfDeceased: {
+    yearOfBirth: {
+      type: Number,
+      require: true,
+    },
+    yearOfDeath: {
       type: Number,
       require: true,
     },
@@ -55,9 +59,9 @@ const funeralSchema = new Schema(
     // },
     status: {
       type: Boolean,
-      default: false,
+      default: true,
     },
-    imageOfDeceased: {
+    imagesOfDeceased: {
       type: [String],
     },
     bannerImage: {
@@ -67,6 +71,6 @@ const funeralSchema = new Schema(
   { timestamps: true }
 );
 
-funeralSchema.index({ nameOfDeceased: 1, startDate: 1 }, { unique: true });
+funeralSchema.index({ nameOfDeceased: 1, startDate: 1 });
 
 module.exports = model('Funeral', funeralSchema);
