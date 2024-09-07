@@ -23,8 +23,8 @@ const getDonations = async (req, res) => {
   const pageSize = req.query.pageSize || 10;
   const pageNumber = req.query.pageNumber || 1;
   const skip = (pageNumber - 1) * pageSize;
+  const paymentMethod = req.query.paymentMethod || '';
 
-  console.log(funeralId);
   try {
     const filter = {
       $or: [
@@ -34,6 +34,9 @@ const getDonations = async (req, res) => {
     };
 
     filter.funeralId = funeralId;
+    if (paymentMethod) {
+      filter.modeOfDonation = paymentMethod;
+    }
 
     const total = await Donation.countDocuments(filter);
     const donations = await Donation.find(filter)
@@ -98,4 +101,19 @@ const donationStats = async (req, res) => {
   }
 };
 
-module.exports = { createDonation, getDonations, donationStats };
+const confirmPayment = async (req, res) => {
+  try {
+    console.log(req.body);
+    return res.status(200).json('Success');
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json('Failed');
+  }
+};
+
+module.exports = {
+  createDonation,
+  getDonations,
+  donationStats,
+  confirmPayment,
+};

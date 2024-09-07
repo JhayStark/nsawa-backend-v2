@@ -17,7 +17,7 @@ const donationsSchema = new Schema(
     },
     modeOfDonation: {
       type: String,
-      enum: ['Momo', 'Cash', 'Card'],
+      enum: ['Cash', 'Online'],
       required: true,
     },
     donorPhoneNumber: {
