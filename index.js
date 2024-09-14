@@ -30,12 +30,12 @@ app.use(cookieParser());
 const port = process.env.PORT || 3001;
 
 app.use('/auth', authRouter);
+app.use('/donations/public', publicDonationRouter);
+app.use('/funerals/public', publicFuneralRouter);
+app.use('/key-persons/public', publicKeyPersonRouter);
 app.use('/funeral', verifyToken, funeralRouter);
 app.use('/key-person', verifyToken, keyPersonRouter);
 app.use('/donation', verifyToken, donationRouter);
-app.use('/donations/public', publicDonationRouter);
-app.use('/funerals/public', publicFuneralRouter);
-app.use('/key-person/public', publicKeyPersonRouter);
 
 (async function start() {
   await dbConnect();

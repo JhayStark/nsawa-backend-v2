@@ -94,6 +94,7 @@ const getAllKeyPersonsForFuneral = async (req, res) => {
 
     res.status(200).json({ persons, total, pageNumber, pageSize });
   } catch (error) {
+    console.log(error);
     res.status(500).json(error);
   }
 };

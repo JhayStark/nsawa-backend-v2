@@ -26,8 +26,9 @@ ${funeral?.familyName}`;
       .then(res => console.log(res?.data))
       .catch(err => console.log(err));
 
-    res.status(200).json('Donation received');
+    res.status(200).json({ id: donation?._id });
   } catch (error) {
+    console.log(error);
     res.status(500).json(error);
   }
 };
@@ -118,7 +119,15 @@ const donationStats = async (req, res) => {
 
 const confirmPayment = async (req, res) => {
   try {
-    console.log(req.body);
+    console.log(req.body.data.reference);
+    if (req.body.data.reference && req.body.gateway_response == 'Approved') {
+      const donation = await Donation.findOne({
+        reference: req.body.data.reference,
+      });
+      if (!donation) return res.status(404).json('Donation not found');
+      donation.status = 'Paid';
+      await donation.save();
+    }
     return res.status(200).json('Success');
   } catch (error) {
     console.log(error);
