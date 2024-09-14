@@ -2,6 +2,7 @@ const ObjectId = require('mongoose').Types.ObjectId;
 const Donation = require('./donations.model');
 const Funeral = require('../funerals/funeral.model');
 const KeyPerson = require('../keyPerson/keyPerson.model');
+const { sendSms } = require('../../utils/smsApi');
 
 const createDonation = async (req, res) => {
   try {
@@ -11,7 +12,21 @@ const createDonation = async (req, res) => {
       return res.status(404).json('Funeral or key person not found');
     const donation = await Donation.create({ ...req.body });
     if (!donation) return res.status(400).json('Donation not received');
-    res.status(200).json('Donation received ');
+
+    const message = `Dear ${donation?.donorName},
+
+On behalf of the family, we sincerely thank you for your generous donation towards the funeral of ${funeral?.nameOfDeceased}. Your support means a lot to us in this difficult time.
+
+May God bless you abundantly for your kindness.
+
+With gratitude,
+${funeral?.familyName}`;
+
+    sendSms([donation?.donorPhoneNumber], message)
+      .then(res => console.log(res?.data))
+      .catch(err => console.log(err));
+
+    res.status(200).json('Donation received');
   } catch (error) {
     res.status(500).json(error);
   }

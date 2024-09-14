@@ -31,6 +31,11 @@ const donationsSchema = new Schema(
     announcement: {
       type: String,
     },
+    status: {
+      type: String,
+      enum: ['Pending', 'Paid'],
+      default: 'Pending',
+    },
   },
   { timestamps: true }
 );

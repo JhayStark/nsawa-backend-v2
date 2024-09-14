@@ -1,35 +1,66 @@
-const axios = require("axios");
+const axios = require('axios');
 
-const sendSms = (contact) => {
-  let number = [contact];
-  let data = JSON.stringify({
-    senderId: "Nsawan",
-    contacts: number,
-    message: `Thank you for donating to the New Funeral`,
-  });
+const sendSms = (recipients, message) => {
+  const data = {
+    sender: process.env.SENDER_ID,
+    message,
+    recipients,
+  };
 
-  let config = {
-    method: "post",
-    maxBodyLength: Infinity,
-    url: "https://pagezinc.com/fastapi/v1/send-sms",
+  const config = {
+    method: 'post',
+    url: process.env.SMS_API,
     headers: {
-      "Content-Type": "application/json",
+      'api-key': `${process.env.SMS_API_KEY}`,
     },
-    data: data,
+    data,
   };
 
   return new Promise(function (resolve, reject) {
-    axios
-      .request(config)
-      .then((response) => {
+    axios(config)
+      .then(response => {
         console.log(JSON.stringify(response.data));
         resolve(response.data);
       })
-      .catch((error) => {
+      .catch(error => {
         console.log(error.response.data);
         reject(error.response.data);
       });
   });
 };
 
-module.exports = { sendSms };
+const generateOtp = (number, message) => {
+  const data = {
+    expiry: 5,
+    length: 6,
+    medium: 'sms',
+    message: `${message}, %otp_code%`,
+    number,
+    sender_id: process.env.SENDER_ID,
+    type: 'numeric',
+  };
+  const headers = {
+    'api-key': `${process.env.SMS_API_KEY}`,
+  };
+  return axios
+    .post('https://sms.arkesel.com/api/otp/generate', data, { headers })
+    .then(response => response)
+    .catch(error => error);
+};
+
+const verifyOtp = (number, code) => {
+  const data = {
+    api_key: process.env.SMS_API_KEY,
+    code,
+    number,
+  };
+  const headers = {
+    'api-key': `${process.env.SMS_API_KEY}`,
+  };
+  return axios
+    .post('https://sms.arkesel.com/api/otp/verify', data, { headers })
+    .then(response => response)
+    .catch(error => error);
+};
+
+module.exports = { sendSms, generateOtp, verifyOtp };

@@ -77,6 +77,15 @@ const login = async (req, res) => {
   }
 };
 
+const sendResetPasswordOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = User.findOne({ email });
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
 module.exports = {
   login,
   register,
