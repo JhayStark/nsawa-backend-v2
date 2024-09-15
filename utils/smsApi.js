@@ -16,17 +16,15 @@ const sendSms = (recipients, message) => {
     data,
   };
 
-  return new Promise(function (resolve, reject) {
-    axios(config)
-      .then(response => {
-        console.log(JSON.stringify(response.data));
-        resolve(response.data);
-      })
-      .catch(error => {
-        console.log(error.response.data);
-        reject(error.response.data);
-      });
-  });
+  return axios(config)
+    .then(response => {
+      console.log(JSON.stringify(response.data));
+      return response.data;
+    })
+    .catch(error => {
+      console.log(error.response.data);
+      return error.response.data;
+    });
 };
 
 const generateOtp = (number, message) => {

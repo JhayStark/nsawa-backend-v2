@@ -119,7 +119,6 @@ const donationStats = async (req, res) => {
 
 const confirmPayment = async (req, res) => {
   try {
-    console.log(req.body.data.reference);
     if (req.body.data.reference && req.body.gateway_response == 'Approved') {
       const donation = await Donation.findOne({
         reference: req.body.data.reference,
