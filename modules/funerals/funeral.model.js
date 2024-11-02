@@ -32,31 +32,12 @@ const funeralSchema = new Schema(
       type: Date,
       required: true,
     },
-    // keyPersonalities: {
-    //   type: [mongoose.Schema.Types.ObjectId],
-    //   ref: "KeyPerson",
-    // },
-    // donations: {
-    //   type: [mongoose.Schema.Types.ObjectId],
-    //   ref: "Donation",
-    // },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
     },
-    // totalDonations: {
-    //   type: Number,
-    //   default: 0,
-    // },
-    // totalDonor: {
-    //   type: Number,
-    //   default: 0,
-    // },
-    // totalOnlineDonations: {
-    //   type: Number,
-    //   default: 0,
-    // },
+
     status: {
       type: Boolean,
       default: true,
@@ -65,6 +46,13 @@ const funeralSchema = new Schema(
       type: [String],
     },
     bannerImage: {
+      type: String,
+    },
+    balance: {
+      type: Number,
+      default: 0,
+    },
+    lastPaymentSubscriptionReference: {
       type: String,
     },
   },

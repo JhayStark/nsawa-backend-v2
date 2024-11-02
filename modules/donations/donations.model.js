@@ -7,7 +7,6 @@ const donationsSchema = new Schema(
     },
     keyPerson: {
       type: Schema.Types.ObjectId,
-      required: true,
       ref: 'KeyPerson',
     },
     funeralId: {
@@ -38,6 +37,10 @@ const donationsSchema = new Schema(
     },
     reference: {
       type: String,
+    },
+    thankYouMessageStatus: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true }

@@ -1,6 +1,6 @@
 const Funeral = require('./funeral.model');
 const User = require('../user/user.model');
-const { sendSms } = require('../../utils/smsApi');
+const { sendSms, generateOtp, verifyOtp } = require('../../utils/smsApi');
 
 const createFuneral = async (req, res) => {
   const userId = req.user.id;
@@ -105,6 +105,7 @@ const sendMessages = async (req, res) => {
   const { funeralId } = req.query;
   let successCount = 0;
   let failCount = 0;
+  const thankYouMessage = req.body.message;
   try {
     const donors = await Funeral.findById(funeralId, { donations: 1 }).populate(
       'donations',
@@ -114,7 +115,7 @@ const sendMessages = async (req, res) => {
     if (donors.donations.length > 0) {
       const donorNumbers = donors.donations;
       const sending = donorNumbers.map(donor => {
-        sendSms(donor.donorPhoneNumber)
+        sendSms(donor.donorPhoneNumber, thankYouMessage)
           .then(response => {
             console.log(response);
             successCount += 1;
@@ -137,6 +138,33 @@ const sendMessages = async (req, res) => {
   }
 };
 
+const sendWithdrawalOtp = async (req, res) => {
+  try {
+    console.log(req.query);
+    const funeral = await Funeral.findById(req.query.funeralId);
+    if (!funeral) return res.status(404).json('Funeral not found');
+    await generateOtp(
+      funeral.phoneNumber,
+      'To confirm this transaction, please use the One-Time Password (OTP) provided below  '
+    );
+    res.status(200).json('Otp sent');
+  } catch (error) {
+    return res.status(500).send('Internal Server Error');
+  }
+};
+
+const addSubcriptionToFuneral = async (req, res) => {
+  try {
+    const funeral = await Funeral.findById(req.query.funeralId);
+    if (!funeral) return res.status(404).json('Funeral not found');
+    funeral.balance = funeral.balance + req.body.sms;
+    await funeral.save();
+    res.status(200).json('Funeral subscribed');
+  } catch (error) {
+    return res.status(500).send('Internal Server Error');
+  }
+};
+
 module.exports = {
   createFuneral,
   editFuneral,
@@ -144,4 +172,6 @@ module.exports = {
   getSingleFuneral,
   deleteFuneral,
   sendMessages,
+  sendWithdrawalOtp,
+  addSubcriptionToFuneral,
 };

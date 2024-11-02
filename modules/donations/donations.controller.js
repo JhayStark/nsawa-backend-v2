@@ -8,7 +8,8 @@ const createDonation = async (req, res) => {
   try {
     const funeral = await Funeral.findById(req.body.funeralId);
     const keyPerson = await KeyPerson.findById(req.body.keyPerson);
-    if (!funeral || !keyPerson)
+    const selectedKeyPerson = req.body.keyPerson;
+    if (!funeral || (selectedKeyPerson && !keyPerson))
       return res.status(404).json('Funeral or key person not found');
     const donation = await Donation.create({ ...req.body });
     if (!donation) return res.status(400).json('Donation not received');
@@ -134,9 +135,69 @@ const confirmPayment = async (req, res) => {
   }
 };
 
+const sendDonorThankYouMessages = async (req, res) => {
+  try {
+    const thankYouMessage = req.body.message;
+    const funeralId = req.body.funeralId;
+
+    //Fetch the funeral
+    const funeral = await Funeral.findById(funeralId);
+
+    //Check if funeral has sms balance
+    // if (funeral.balance <= 0) {
+    //   return res.status(400).json('Insufficient SMS balance');
+    // }
+
+    // Fetch donors for the given funeral ID
+    const donors = await Donation.find({ funeralId });
+
+    if (!donors?.length) return res.status(404).send('No donors found');
+
+    // Extract phone numbers from the donor list
+    const recipientPhoneNumbers = donors.map(donor => donor.donorPhoneNumber);
+
+    //limit recipient phone numbers to sms balance
+    // const limitedRecipientPhoneNumbers = recipientPhoneNumbers.slice(
+    //   0,
+    //   funeral.balance
+    // );
+
+    // Check if we have recipients to send the message to
+    if (recipientPhoneNumbers.length > 0) {
+      try {
+        // Send the SMS to all donors in a single call
+        const response = await sendSms(recipientPhoneNumbers, thankYouMessage);
+        if (response.success) {
+          // Update the funeral balance
+          // funeral.balance -= recipientPhoneNumbers.length;
+          // await funeral.save();
+          return res
+            .status(200)
+            .json(
+              `Messages sent successfully to ${recipientPhoneNumbers.length} donors`
+            );
+        } else {
+          return res
+            .status(500)
+            .json(`Failed to send messages: ${response.error}`);
+        }
+      } catch (error) {
+        console.error(`Failed to send SMS: ${error}`);
+        return res.status(500).json('Failed to send messages');
+      }
+    } else {
+      return res.status(404).json('No valid phone numbers found for donors');
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json('Internal Server Error');
+  }
+};
+
 module.exports = {
   createDonation,
   getDonations,
   donationStats,
   confirmPayment,
+  sendDonorThankYouMessages,
 };
