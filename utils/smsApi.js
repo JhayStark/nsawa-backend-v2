@@ -61,11 +61,11 @@ const generateOtp = (number, message) => {
   return axios
     .post('https://sms.arkesel.com/api/otp/generate', data, { headers })
     .then(response => {
-      // console.log(response);
+      console.log(response);
       return response;
     })
     .catch(error => {
-      // console.log(error);
+      console.log(error);
       return error;
     });
 };
