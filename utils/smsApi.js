@@ -45,6 +45,7 @@ const sendSms = async (recipients, message) => {
 };
 
 const generateOtp = (number, message) => {
+  console.log(number, message);
   const data = {
     expiry: 5,
     length: 6,
@@ -60,11 +61,11 @@ const generateOtp = (number, message) => {
   return axios
     .post('https://sms.arkesel.com/api/otp/generate', data, { headers })
     .then(response => {
-      console.log(response);
+      // console.log(response);
       return response;
     })
     .catch(error => {
-      console.log(error);
+      // console.log(error);
       return error;
     });
 };
