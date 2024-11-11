@@ -16,6 +16,7 @@ const { publicDonationRouter } = require('./modules/donations/public.route');
 const { publicFuneralRouter } = require('./modules/funerals/public.route');
 const { publicKeyPersonRouter } = require('./modules/keyPerson/public.route');
 const publicRouter = require('./modules/public/public.route');
+const UserRouter = require('./modules/user/user.routes');
 
 dotenv.config();
 const app = express();
@@ -38,6 +39,7 @@ app.use('/pub', publicRouter);
 app.use('/funeral', verifyToken, funeralRouter);
 app.use('/key-person', verifyToken, keyPersonRouter);
 app.use('/donation', verifyToken, donationRouter);
+app.use('/user', verifyToken, UserRouter);
 
 (async function start() {
   await dbConnect();
