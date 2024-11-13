@@ -90,7 +90,7 @@ const donationStats = async (req, res) => {
           totalMomoDonations: {
             $sum: {
               $cond: {
-                if: { $eq: ['$modeOfDonation', 'Momo'] },
+                if: { $eq: ['$modeOfDonation', 'Online'] },
                 then: '$amountDonated',
                 else: 0,
               },
