@@ -153,6 +153,18 @@ const sendWithdrawalOtp = async (req, res) => {
   }
 };
 
+const verifyWithdrawalOtp = async (req, res) => {
+  try {
+    const funeral = await Funeral.findById(req.body.funeralId);
+    if (!funeral) return res.status(404).json('Funeral not found');
+    const otp = req.body.otp;
+    await verifyOtp(funeral.phoneNumber, otp);
+    res.status(200).json('Otp verified');
+  } catch (error) {
+    return res.status(500).json('Internal Server Error');
+  }
+};
+
 const addSubcriptionToFuneral = async (req, res) => {
   try {
     const funeral = await Funeral.findById(req.query.funeralId);
@@ -161,7 +173,7 @@ const addSubcriptionToFuneral = async (req, res) => {
     await funeral.save();
     res.status(200).json('Funeral subscribed');
   } catch (error) {
-    return res.status(500).send('Internal Server Error');
+    return res.status(500).json('Internal Server Error');
   }
 };
 
@@ -174,4 +186,5 @@ module.exports = {
   sendMessages,
   sendWithdrawalOtp,
   addSubcriptionToFuneral,
+  verifyWithdrawalOtp,
 };
