@@ -1,4 +1,5 @@
 const { confirmAccount, getBanks } = require('../../utils/paystack');
+const { confirmOtp } = require('../../utils/payment');
 
 const confirmUserPaymentAccount = async (req, res) => {
   try {
@@ -30,4 +31,17 @@ const getBankList = async (req, res) => {
   }
 };
 
-module.exports = { confirmUserPaymentAccount, getBankList };
+const confirmOtp = async (req, res) => {
+  try {
+    const data = {
+      reference: req.body.reference,
+      otp: req.body.otp,
+    };
+    await confirmOtp(data);
+    res.status(200).json({ message: 'OTP confirmed' });
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
+module.exports = { confirmUserPaymentAccount, getBankList, confirmOtp };
