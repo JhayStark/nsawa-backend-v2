@@ -17,6 +17,7 @@ const { publicFuneralRouter } = require('./modules/funerals/public.route');
 const { publicKeyPersonRouter } = require('./modules/keyPerson/public.route');
 const publicRouter = require('./modules/public/public.route');
 const UserRouter = require('./modules/user/user.routes');
+const { confirmPayment } = require('./modules/donations/donations.controller');
 
 dotenv.config();
 const app = express();
@@ -30,6 +31,8 @@ app.use(cors(corsOptions));
 app.use(cookieParser());
 
 const port = process.env.PORT || 3001;
+
+app.use('/webhook', confirmPayment);
 
 app.use('/auth', authRouter);
 app.use('/donations/public', publicDonationRouter);

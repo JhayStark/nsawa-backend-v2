@@ -3,18 +3,26 @@ const Donation = require('./donations.model');
 const Funeral = require('../funerals/funeral.model');
 const KeyPerson = require('../keyPerson/keyPerson.model');
 const { sendSms } = require('../../utils/smsApi');
+const { initateMomoPay } = require('../../utils/payment');
 
-const createDonation = async (req, res) => {
-  try {
-    const funeral = await Funeral.findById(req.body.funeralId);
-    const keyPerson = await KeyPerson.findById(req.body.keyPerson);
-    const selectedKeyPerson = req.body.keyPerson;
-    if (!funeral || (selectedKeyPerson && !keyPerson))
-      return res.status(404).json('Funeral or key person not found');
-    const donation = await Donation.create({ ...req.body });
-    if (!donation) return res.status(400).json('Donation not received');
+const phoneNumberConfig = {
+  airtelTigo: { code: 'ATL', prefix: ['026', '027', '056', '057'] },
+  mtn: { code: 'MTN', prefix: ['025', '024', '053', '054', '055', '059'] },
+  vodafone: { code: 'VOD', prefix: ['020', '050'] },
+};
 
-    const message = `Dear ${donation?.donorName},
+const getProviderCode = phoneNumber => {
+  const prefix = phoneNumber.substring(0, 3);
+  for (const provider in phoneNumberConfig) {
+    if (phoneNumberConfig[provider].prefix.includes(prefix)) {
+      return phoneNumberConfig[provider].code;
+    }
+  }
+  return null;
+};
+
+const sendSingleThankYouMessage = async (funeral, donation) => {
+  const message = `Dear ${donation?.donorName},
 
 On behalf of the family, we sincerely thank you for your generous donation towards the funeral of ${funeral?.nameOfDeceased}. Your support means a lot to us in this difficult time.
 
@@ -23,11 +31,56 @@ May God bless you abundantly for your kindness.
 With gratitude,
 ${funeral?.familyName}`;
 
-    sendSms([donation?.donorPhoneNumber], message)
-      .then(res => console.log(res?.data))
-      .catch(err => console.log(err));
+  if (!funeral.balance) return;
+  await sendSms([donation.donorPhoneNumber], message);
+  funeral.balance -= 1;
+  return await funeral.save();
+};
 
-    res.status(200).json({ id: donation?._id });
+const createDonation = async (req, res) => {
+  try {
+    const funeral = await Funeral.findById(req.body.funeralId);
+    const keyPerson = await KeyPerson.findById(req.body.keyPerson);
+
+    if (!funeral._id.toString() || !keyPerson._id.toString())
+      return res.status(404).json('Funeral or key person not found');
+
+    const donation = await Donation.create({ ...req.body });
+    if (!donation) return res.status(400).json('Donation not received');
+
+    let showOtpModal = false;
+
+    if (req.body.modeOfDonation == 'Cash') {
+      donation.status = 'Paid';
+      await donation.save();
+      await sendSingleThankYouMessage(funeral, donation);
+    } else {
+      // Prepare payment data for mobile money payment
+      const paymentData = {
+        amount: donation.amountDonated * 100, // Convert to the lowest currency unit
+        email: `${donation.donorPhoneNumber}@mailinator.com`, // Fallback email
+        currency: 'GHS',
+        mobile_money: {
+          phone: donation.donorPhoneNumber,
+          provider: getProviderCode(donation.donorPhoneNumber), // Resolve provider code
+        },
+      };
+
+      if (paymentData.mobile_money.provider == null) {
+        await Donation.findByIdAndDelete(donation._id.toString());
+        return res.status(400).json('Invalid phone number');
+      }
+      // Initiate the mobile money payment
+      const paymentResponse = await initateMomoPay(paymentData);
+      showOtpModal = paymentResponse?.data?.data?.status == 'send_otp';
+      const paymentReference = paymentResponse?.data?.data?.reference;
+      console.log(paymentResponse?.data?.data);
+      console.log(paymentReference);
+      donation.reference = paymentReference;
+      await donation.save();
+    }
+
+    res.status(200).json({ id: donation?._id, showOtpModal });
   } catch (error) {
     console.log(error);
     res.status(500).json(error);
@@ -120,18 +173,23 @@ const donationStats = async (req, res) => {
 
 const confirmPayment = async (req, res) => {
   try {
-    if (req.body.data.reference && req.body.gateway_response == 'Approved') {
+    if (
+      req.body.data.reference &&
+      req.body.data.gateway_response == 'Approved'
+    ) {
       const donation = await Donation.findOne({
         reference: req.body.data.reference,
       });
       if (!donation) return res.status(404).json('Donation not found');
       donation.status = 'Paid';
       await donation.save();
+      const funeral = await Funeral.findById(donation.funeralId);
+      await sendSingleThankYouMessage(funeral, donation);
     }
-    return res.status(200).json('Success');
+    res.status(200).json('Success');
   } catch (error) {
     console.log(error);
-    return res.status(500).json('Failed');
+    res.status(500).json('Failed');
   }
 };
 
@@ -144,9 +202,9 @@ const sendDonorThankYouMessages = async (req, res) => {
     const funeral = await Funeral.findById(funeralId);
 
     //Check if funeral has sms balance
-    // if (funeral.balance <= 0) {
-    //   return res.status(400).json('Insufficient SMS balance');
-    // }
+    if (!funeral.balance) {
+      return res.status(400).json('Insufficient SMS balance');
+    }
 
     // Fetch donors for the given funeral ID
     const donors = await Donation.find({ funeralId });
@@ -157,24 +215,27 @@ const sendDonorThankYouMessages = async (req, res) => {
     const recipientPhoneNumbers = donors.map(donor => donor.donorPhoneNumber);
 
     //limit recipient phone numbers to sms balance
-    // const limitedRecipientPhoneNumbers = recipientPhoneNumbers.slice(
-    //   0,
-    //   funeral.balance
-    // );
+    const limitedRecipientPhoneNumbers = recipientPhoneNumbers.slice(
+      0,
+      funeral.balance
+    );
 
     // Check if we have recipients to send the message to
-    if (recipientPhoneNumbers.length > 0) {
+    if (limitedRecipientPhoneNumbers.length) {
       try {
         // Send the SMS to all donors in a single call
-        const response = await sendSms(recipientPhoneNumbers, thankYouMessage);
+        const response = await sendSms(
+          limitedRecipientPhoneNumbers,
+          thankYouMessage
+        );
         if (response.success) {
           // Update the funeral balance
-          // funeral.balance -= recipientPhoneNumbers.length;
-          // await funeral.save();
+          funeral.balance -= limitedRecipientPhoneNumbers.length;
+          await funeral.save();
           return res
             .status(200)
             .json(
-              `Messages sent successfully to ${recipientPhoneNumbers.length} donors`
+              `Messages sent successfully to ${limitedRecipientPhoneNumbers.length} donors`
             );
         } else {
           return res
@@ -190,7 +251,7 @@ const sendDonorThankYouMessages = async (req, res) => {
     }
   } catch (error) {
     console.error(error);
-    return res.status(500).json('Internal Server Error');
+    res.status(500).json('Internal Server Error');
   }
 };
 
