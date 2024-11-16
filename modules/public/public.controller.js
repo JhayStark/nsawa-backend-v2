@@ -31,7 +31,7 @@ const getBankList = async (req, res) => {
   }
 };
 
-const confirmOtp = async (req, res) => {
+const confirmPaystackOtp = async (req, res) => {
   try {
     const data = {
       reference: req.body.reference,
@@ -44,4 +44,4 @@ const confirmOtp = async (req, res) => {
   }
 };
 
-module.exports = { confirmUserPaymentAccount, getBankList, confirmOtp };
+module.exports = { confirmUserPaymentAccount, getBankList, confirmPaystackOtp };
