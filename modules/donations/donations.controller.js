@@ -80,7 +80,11 @@ const createDonation = async (req, res) => {
       await donation.save();
     }
 
-    res.status(200).json({ id: donation?._id, showOtpModal });
+    res.status(200).json({
+      id: donation?._id,
+      showOtpModal,
+      paymentReference: donation.reference,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json(error);
