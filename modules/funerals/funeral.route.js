@@ -8,10 +8,12 @@ const {
   sendMessages,
   sendWithdrawalOtp,
   verifyWithdrawalOtp,
+  addSubcriptionToFuneral,
 } = require('./funeral.controller');
 
 const funeralRouter = router();
 
+funeralRouter.post('/subscribe', addSubcriptionToFuneral);
 funeralRouter.post('/create', createFuneral);
 funeralRouter.get('/all-funerals', getAllFunerals);
 funeralRouter.delete('/delete', deleteFuneral);

@@ -51,6 +51,22 @@ const confirmOtp = async data =>
 const confirmPayment = async reference =>
   paymentInstance.get(`/payment/confirm-payment?reference=${reference}`);
 
+const phoneNumberConfig = {
+  airtelTigo: { code: 'ATL', prefix: ['026', '027', '056', '057'] },
+  mtn: { code: 'MTN', prefix: ['025', '024', '053', '054', '055', '059'] },
+  vodafone: { code: 'VOD', prefix: ['020', '050'] },
+};
+
+const getProviderCode = phoneNumber => {
+  const prefix = phoneNumber.substring(0, 3);
+  for (const provider in phoneNumberConfig) {
+    if (phoneNumberConfig[provider].prefix.includes(prefix)) {
+      return phoneNumberConfig[provider].code;
+    }
+  }
+  return null;
+};
+
 module.exports = {
   confirmAccount,
   getBanks,
@@ -58,4 +74,5 @@ module.exports = {
   initateMomoPay,
   confirmPayment,
   confirmOtp,
+  getProviderCode,
 };

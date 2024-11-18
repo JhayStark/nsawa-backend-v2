@@ -4,22 +4,7 @@ const Funeral = require('../funerals/funeral.model');
 const KeyPerson = require('../keyPerson/keyPerson.model');
 const { sendSms } = require('../../utils/smsApi');
 const { initateMomoPay } = require('../../utils/payment');
-
-const phoneNumberConfig = {
-  airtelTigo: { code: 'ATL', prefix: ['026', '027', '056', '057'] },
-  mtn: { code: 'MTN', prefix: ['025', '024', '053', '054', '055', '059'] },
-  vodafone: { code: 'VOD', prefix: ['020', '050'] },
-};
-
-const getProviderCode = phoneNumber => {
-  const prefix = phoneNumber.substring(0, 3);
-  for (const provider in phoneNumberConfig) {
-    if (phoneNumberConfig[provider].prefix.includes(prefix)) {
-      return phoneNumberConfig[provider].code;
-    }
-  }
-  return null;
-};
+const { getProviderCode } = require('../../utils/payment');
 
 const sendSingleThankYouMessage = async (funeral, donation) => {
   const message = `Dear ${donation?.donorName},
