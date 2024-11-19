@@ -174,7 +174,14 @@ const addSubcriptionToFuneral = async (req, res) => {
     console.log(req.body.funeralId);
     const funeral = await Funeral.findById(req.body.funeralId);
     if (!funeral) return res.status(404).json('Funeral not found');
-    funeral.balance = funeral.balance + req.body.sms;
+    if (
+      funeral.lastPaymentSubscriptionReference.paymentReference !==
+      req.body.reference
+    ) {
+      return res.status(400).json('Payment not successful');
+    }
+    funeral.balance =
+      funeral.balance + funeral.lastPaymentSubscriptionReference.sms;
     await funeral.save();
     res.status(200).json('Funeral subscribed');
   } catch (error) {

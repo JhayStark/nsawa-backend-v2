@@ -1,6 +1,5 @@
 const { confirmAccount, getBanks } = require('../../utils/paystack');
 const { confirmOtp, initateMomoPay } = require('../../utils/payment');
-const { phoneNumberConfig } = require('../../utils/payment');
 const Funeral = require('../funerals/funeral.model');
 
 const confirmUserPaymentAccount = async (req, res) => {
@@ -48,7 +47,7 @@ const confirmPaystackOtp = async (req, res) => {
 
 const initiatePayment = async (req, res) => {
   try {
-    const { phoneNumber, amount, funeralId } = req.body;
+    const { phoneNumber, amount, funeralId, sms } = req.body;
     const paymentData = {
       amount: amount * 100, // Convert to the lowest currency unit
       email: `${phoneNumber}@mailinator.com`, // Fallback email
@@ -67,7 +66,7 @@ const initiatePayment = async (req, res) => {
     const showOtpModal = paymentResponse?.data?.data?.status == 'send_otp';
     const paymentReference = paymentResponse?.data?.data?.reference;
     await Funeral.findByIdAndUpdate(funeralId, {
-      lastPaymentSubscriptionReference: paymentReference,
+      lastPaymentSubscriptionReference: { paymentReference, sms },
     });
     res.status(200).json({
       showOtpModal,

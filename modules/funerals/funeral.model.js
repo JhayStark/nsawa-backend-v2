@@ -53,7 +53,7 @@ const funeralSchema = new Schema(
       default: 0,
     },
     lastPaymentSubscriptionReference: {
-      type: String,
+      type: Object,
     },
   },
   { timestamps: true }
