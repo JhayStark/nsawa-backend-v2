@@ -1,7 +1,7 @@
 const Funeral = require('./funeral.model');
 const User = require('../user/user.model');
 const { sendSms, generateOtp, verifyOtp } = require('../../utils/smsApi');
-const { confirmPayment } = require('../../utils/payment');
+const { confirmPayment, initiateWithdrawal } = require('../../utils/payment');
 
 const createFuneral = async (req, res) => {
   const userId = req.user.id;
@@ -156,13 +156,25 @@ const sendWithdrawalOtp = async (req, res) => {
 
 const verifyWithdrawalOtp = async (req, res) => {
   try {
+    const { type, name, bank_code, amount, account_number } = req.body;
     const funeral = await Funeral.findById(req.body.funeralId);
     if (!funeral) return res.status(404).json('Funeral not found');
     const otp = req.body.otp;
     await verifyOtp(funeral.phoneNumber, otp);
-    res.status(200).json('Otp verified');
+
+    const paymentData = {
+      type,
+      name,
+      currency: 'GHS',
+      bank_code,
+      amount,
+      account_number,
+      reason: 'Donations withdrawal',
+    };
+    await initiateWithdrawal(paymentData);
+    res.status(200).json('Otp verified, payment intiated');
   } catch (error) {
-    return res.status(500).json('Internal Server Error');
+    return res.status(500).json(error?.message);
   }
 };
 
