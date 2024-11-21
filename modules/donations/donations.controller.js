@@ -162,6 +162,7 @@ const donationStats = async (req, res) => {
 
 const confirmPayment = async (req, res) => {
   try {
+    console.log(req.body);
     if (
       req.body.data.reference &&
       req.body.data.gateway_response == 'Approved'

@@ -1,5 +1,9 @@
 const { confirmAccount, getBanks } = require('../../utils/paystack');
-const { confirmOtp, initateMomoPay } = require('../../utils/payment');
+const {
+  confirmOtp,
+  initateMomoPay,
+  getProviderCode,
+} = require('../../utils/payment');
 const Funeral = require('../funerals/funeral.model');
 
 const confirmUserPaymentAccount = async (req, res) => {
@@ -73,6 +77,7 @@ const initiatePayment = async (req, res) => {
       paymentReference,
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json(error);
   }
 };
