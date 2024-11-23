@@ -1,6 +1,18 @@
 const KeyPerson = require('./keyPerson.model');
 const Funeral = require('../funerals/funeral.model');
 
+//Bulk create generic key persons mother,father,wife,husband,family
+const createGenericKeyPersons = async (funeralId, userId) => {
+  await KeyPerson.insertMany([
+    {
+      name: 'Family',
+      relation: 'Family',
+      funeralId: funeralId,
+      createdBy: userId,
+    },
+  ]);
+};
+
 const createKeyPerson = async (req, res) => {
   try {
     const funeral = await Funeral.findById(req.body.funeralId);
@@ -128,4 +140,5 @@ module.exports = {
   getAllKeyPersonsForFuneral,
   getSingleKeyPerson,
   deleteKeyPerson,
+  createGenericKeyPersons,
 };

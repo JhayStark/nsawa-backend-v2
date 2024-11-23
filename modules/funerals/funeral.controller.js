@@ -2,6 +2,9 @@ const Funeral = require('./funeral.model');
 const User = require('../user/user.model');
 const { sendSms, generateOtp, verifyOtp } = require('../../utils/smsApi');
 const { confirmPayment, initiateWithdrawal } = require('../../utils/payment');
+const {
+  createGenericKeyPersons,
+} = require('../keyPerson/keyPerson.controller');
 
 const createFuneral = async (req, res) => {
   const userId = req.user.id;
@@ -11,6 +14,7 @@ const createFuneral = async (req, res) => {
       userId,
     });
     if (funeral) {
+      await createGenericKeyPersons(funeral._id.toString(), userId);
       return res.status(200).json({ id: funeral._id });
     }
   } catch (error) {
