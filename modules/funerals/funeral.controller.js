@@ -12,6 +12,7 @@ const createFuneral = async (req, res) => {
     const funeral = await Funeral.create({
       ...req.body,
       userId,
+      balance: 10,
     });
     if (funeral) {
       await createGenericKeyPersons(funeral._id.toString(), userId);
