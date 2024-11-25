@@ -140,6 +140,24 @@ const donationStats = async (req, res) => {
             },
           },
           numberOfDonations: { $sum: 1 },
+          totalNumberOfOnlineDonations: {
+            $sum: {
+              $cond: {
+                if: { $eq: ['$modeOfDonation', 'Online'] },
+                then: 1,
+                else: 0,
+              },
+            },
+          },
+          totalNumberOfCashDonations: {
+            $sum: {
+              $cond: {
+                if: { $eq: ['$modeOfDonation', 'Cash'] },
+                then: 1,
+                else: 0,
+              },
+            },
+          },
         },
       },
     ]);
@@ -151,6 +169,8 @@ const donationStats = async (req, res) => {
         totalCashDonations: 0,
         totalMomoDonations: 0,
         numberOfDonations: 0,
+        totalNumberOfOnlineDonations: 0,
+        totalNumberOfCashDonations: 0,
       };
     }
 
