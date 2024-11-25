@@ -86,6 +86,7 @@ const getDonations = async (req, res) => {
 
   try {
     const filter = {
+      status: 'Paid',
       $or: [
         { donorName: { $regex: search, $options: 'i' } },
         { donorEmail: { $regex: search, $options: 'i' } },
@@ -114,7 +115,7 @@ const donationStats = async (req, res) => {
   try {
     const donations = await Donation.aggregate([
       {
-        $match: { funeralId: new ObjectId(funeralId) },
+        $match: { funeralId: new ObjectId(funeralId), status: 'Paid' },
       },
       {
         $group: {
