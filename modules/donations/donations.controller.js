@@ -7,9 +7,9 @@ const { initateMomoPay } = require('../../utils/payment');
 const { getProviderCode } = require('../../utils/payment');
 
 const sendSingleThankYouMessage = async (funeral, donation) => {
-  const message = `Thank you ${donation?.donorName},
+  const message = `Thank you,
 
-On behalf of the family, we sincerely thank you for your generous donation towards the funeral of ${funeral?.nameOfDeceased}. Your support means a lot to us in this difficult time.
+On behalf of the family of the late ${funeral?.nameOfDeceased}, we sincerely thank you for your generous. Your support means a lot to us in this difficult time.
 
 May God bless you abundantly for your kindness.
 
@@ -85,6 +85,8 @@ const getDonations = async (req, res) => {
   const paymentMethod = req.query.paymentMethod || '';
 
   try {
+    //include date filters
+
     const filter = {
       status: 'Paid',
       $or: [
