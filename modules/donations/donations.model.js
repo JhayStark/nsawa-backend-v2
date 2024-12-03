@@ -32,7 +32,7 @@ const donationsSchema = new Schema(
     },
     status: {
       type: String,
-      enum: ['Pending', 'Paid'],
+      enum: ['Pending', 'Paid', 'Failed'],
       default: 'Pending',
     },
     reference: {

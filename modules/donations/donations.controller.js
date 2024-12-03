@@ -83,6 +83,7 @@ const getDonations = async (req, res) => {
   const pageNumber = req.query.pageNumber || 1;
   const skip = (pageNumber - 1) * pageSize;
   const paymentMethod = req.query.paymentMethod || '';
+  const { startDate, endDate } = req.query;
 
   try {
     //include date filters
@@ -98,6 +99,12 @@ const getDonations = async (req, res) => {
     filter.funeralId = funeralId;
     if (paymentMethod) {
       filter.modeOfDonation = paymentMethod;
+    }
+
+    if (startDate || endDate) {
+      filter.createdAt = {};
+      if (startDate) filter.createdAt.$gte = new Date(startDate);
+      if (endDate) filter.createdAt.$lte = new Date(endDate);
     }
 
     const total = await Donation.countDocuments(filter);
@@ -186,18 +193,21 @@ const donationStats = async (req, res) => {
 const confirmPayment = async (req, res) => {
   try {
     console.log(req.body);
-    if (
-      req.body.data.reference &&
-      req.body.data.gateway_response == 'Approved'
-    ) {
+    if (req.body.data.reference) {
       const donation = await Donation.findOne({
         reference: req.body.data.reference,
       });
       if (!donation) return res.status(404).json('Donation not found');
-      donation.status = 'Paid';
-      await donation.save();
-      const funeral = await Funeral.findById(donation.funeralId);
-      await sendSingleThankYouMessage(funeral, donation);
+      if (req.body.data.gateway_response == 'Approved') {
+        donation.status = 'Paid';
+        await donation.save();
+        const funeral = await Funeral.findById(donation.funeralId);
+        await sendSingleThankYouMessage(funeral, donation);
+      }
+      if (req.body.data.status == 'abandoned') {
+        donation.status = 'Failed';
+        await donation.save();
+      }
     }
     res.status(200).json('Success');
   } catch (error) {
@@ -268,10 +278,21 @@ const sendDonorThankYouMessages = async (req, res) => {
   }
 };
 
+const getDonationById = async (req, res) => {
+  try {
+    const donation = await Donation.findById(req.params.id);
+    if (!donation) return res.status(404).json('Donation not found');
+    res.status(200).json(donation);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
 module.exports = {
   createDonation,
   getDonations,
   donationStats,
   confirmPayment,
   sendDonorThankYouMessages,
+  getDonationById,
 };
