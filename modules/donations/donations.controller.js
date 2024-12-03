@@ -9,7 +9,7 @@ const { getProviderCode } = require('../../utils/payment');
 const sendSingleThankYouMessage = async (funeral, donation) => {
   const message = `Thank you,
 
-On behalf of the family of the late ${funeral?.nameOfDeceased}, we sincerely thank you for your generous. Your support means a lot to us in this difficult time.
+On behalf of the family of the late ${funeral?.nameOfDeceased}, we sincerely thank you for your generous donation. Your support means a lot to us in this difficult time.
 
 May God bless you abundantly for your kindness.
 
