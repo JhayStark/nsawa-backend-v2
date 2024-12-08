@@ -55,6 +55,9 @@ const funeralSchema = new Schema(
     lastPaymentSubscriptionReference: {
       type: Object,
     },
+    withdrawalAmount: {
+      type: Number,
+    },
   },
   { timestamps: true }
 );

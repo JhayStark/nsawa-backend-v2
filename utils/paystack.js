@@ -27,30 +27,4 @@ const getBanks = async (type = '') => {
     .catch(err => err);
 };
 
-const createRecipient = async recipient => {
-  const data = {
-    type: 'nuban',
-    name: recipient?.name,
-    account_number: recipient?.accountNumber,
-    bank_code: recipient?.bankCode,
-    currency: 'GHS',
-  };
-
-  const config = {
-    hostname: 'api.paystack.co',
-    port: 443,
-    path: '/transferrecipient',
-    method: 'POST',
-    headers: {
-      Authorization: 'Bearer SECRET_KEY',
-      'Content-Type': 'application/json',
-    },
-    data,
-  };
-  axios
-    .post(config)
-    .then(res => res)
-    .catch(err => err);
-};
-
 module.exports = { confirmAccount, getBanks };

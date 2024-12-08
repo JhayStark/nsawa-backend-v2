@@ -19,28 +19,8 @@ const getBanks = async type => {
   return axios.get(url);
 };
 
-// {
-//   "amount": 1,
-//   "email": "customer@email.com",
-//   "currency": "GHS",
-//   "mobile_money": {
-//     "phone": "0247380359",
-//     "provider": "mtn"
-//   }
-// }
-
 const initateMomoPay = async data =>
   paymentInstance.post(`/payment/momo-pay`, data);
-
-// {
-//     "type": "mobile_money",
-//     "name": "Joel Edem Amenuvor",
-//     "currency": "GHS",
-//     "account_number": "0247380359",
-//     "bank_code": "MTN",
-//     "reason":"test withdrawal",
-//     "amount":100
-// }
 
 const initiateWithdrawal = async data =>
   paymentInstance.post(`/payment/withdraw`, data);

@@ -31,11 +31,7 @@ const createDonation = async (req, res) => {
       return res.status(404).json('Funeral or key person not found');
 
     if (funeral.endDate < new Date()) {
-      return res
-        .status(400)
-        .json(
-          `Donations are no longer being recieved for this funeral, funeral ended on ${funeral.endDate}`
-        );
+      return res.status(400).json({ ended: true });
     }
 
     const donation = await Donation.create({ ...req.body });
