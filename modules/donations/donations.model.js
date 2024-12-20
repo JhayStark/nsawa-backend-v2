@@ -30,6 +30,10 @@ const donationsSchema = new Schema(
     announcement: {
       type: String,
     },
+    announced: {
+      type: Boolean,
+      default: false,
+    },
     status: {
       type: String,
       enum: ['Pending', 'Paid', 'Failed'],
