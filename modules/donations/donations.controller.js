@@ -3,8 +3,11 @@ const Donation = require('./donations.model');
 const Funeral = require('../funerals/funeral.model');
 const KeyPerson = require('../keyPerson/keyPerson.model');
 const { sendSms } = require('../../utils/smsApi');
-const { initateMomoPay } = require('../../utils/payment');
-const { getProviderCode } = require('../../utils/payment');
+const {
+  initateMomoPay,
+  getProviderCode,
+  confirmPayment,
+} = require('../../utils/payment');
 
 const sendSingleThankYouMessage = async (funeral, donation) => {
   const message = `Thank you,
@@ -194,7 +197,7 @@ const donationStats = async (req, res) => {
   }
 };
 
-const confirmPayment = async (req, res) => {
+const confirmPaymentViaWebhook = async (req, res) => {
   try {
     console.log(req.body);
     if (req.body.data.reference) {
@@ -286,6 +289,13 @@ const getDonationById = async (req, res) => {
   try {
     const donation = await Donation.findById(req.params.id);
     if (!donation) return res.status(404).json('Donation not found');
+    if (donation.status !== 'Paid') {
+      const paymentResponse = await confirmPayment(donation.reference);
+      if (paymentResponse?.data?.data?.status == 'success') {
+        donation.status = 'Paid';
+        await donation.save();
+      }
+    }
     res.status(200).json(donation);
   } catch (error) {
     res.status(500).json(error);
@@ -296,7 +306,7 @@ module.exports = {
   createDonation,
   getDonations,
   donationStats,
-  confirmPayment,
+  confirmPaymentViaWebhook,
   sendDonorThankYouMessages,
   getDonationById,
 };
