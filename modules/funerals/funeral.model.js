@@ -1,4 +1,4 @@
-const { Schema, model, default: mongoose } = require('mongoose');
+const { Schema, model, default: mongoose } = require("mongoose");
 
 const funeralSchema = new Schema(
   {
@@ -34,7 +34,7 @@ const funeralSchema = new Schema(
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
     },
 
@@ -58,10 +58,16 @@ const funeralSchema = new Schema(
     withdrawalAmount: {
       type: Number,
     },
+    tribute: {
+      type: String,
+    },
+    briefBio: {
+      type: String,
+    },
   },
   { timestamps: true }
 );
 
 funeralSchema.index({ nameOfDeceased: 1, startDate: 1 });
 
-module.exports = model('Funeral', funeralSchema);
+module.exports = model("Funeral", funeralSchema);
